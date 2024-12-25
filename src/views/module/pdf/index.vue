@@ -3,11 +3,31 @@
     <div class="content">
       <!-- 展示容器 -->
       <div class="left-box">
-        <div class="left-box-up" :ref="refs.wrapper" @wheel.prevent="scaleWheel($event)">
+        <div class="left-box-up" :ref="refs.wrapper" @wheel.capture.prevent="scaleWheel($event)">
           <div class="box" :ref="refs.box" @mousedown="dragstart($event)">
-            <vue-pdf-embed :ref="refs.box" :source="pdfSource" :style="scaleFun" class="vue-pdf-embed" :page="activePage" />
+            <!-- <vue-pdf-embed :ref="refs.box" :source="pdfSource" :style="scaleFun" class="vue-pdf-embed" :page="activePage" />-->
+             <!-- 显示预览的图片 -->
+            <img v-if="imageUrl" :src="imageUrl" :style="scaleFun" class="preview-image" />
+            <el-upload
+              action=""
+              :show-file-list="false"
+              :before-upload="beforeUpload"
+              :on-change="handleFileChange"
+              accept=".png, .jpg, .jpeg, .doc, .docx, .pdf, .ppt, .xls, .xlsx"
+            >
+              <div class="upload-content">
+                <img src="../../../assets/icons/pe-upload-2.svg" class="upload-icon" />
+                <div class="upload-message">
+                  <p>点击上传文件 / 拖拽文件到此处 / 截图后Ctrl+V</p>
+                  <p class="custom-message">
+                    支持 png, jpg, jpeg, doc, docx, pdf, ppt, xlsx, xls 等格式，<br />
+                    上传单个文件大小不超过 50M
+                  </p>
+                </div>
+              </div>
+            </el-upload>
           </div>
-          <input type="file" @change="onFileChange" />
+          <!-- <input type="file" @change="onFileChange" /> -->
         </div>
         <div class="left-box-down">
           <div class="zoomin-wrapper">
@@ -15,13 +35,36 @@
             <img src="../../../assets/icons/pe-smaller.svg" @click="rollBtn('zoomin')" alt="" />
             <img src="../../../assets/icons/pe-inverse.svg" alt="" @click="rolate" />
           </div>
+          <!-- 实现分页 -->
+          <div class="pagination">
+          <el-pagination
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            :total="totalItems"
+            :small="false"
+            layout="prev, pager, next, jumper"
+          />
+        </div>
+          
         </div>
       </div>
       <div class="right-box">
-        <div class="item" v-for="(value, key) in parseObj">
-          <div class="label">{{ key }}</div>
+        <div 
+          class="item" 
+          v-for="(entry, value) in displayedItems" 
+          :key="key"
+          :style="{ display: Object.keys(displayedItems).length ? 'flex' : 'none' }"
+        >
+          <div class="label">{{ entry.key }}</div>
           <div class="text">
-            {{ value }}
+            <input v-model="entry.value" /> 
+          </div>
+        </div>
+        <div class="upload-alert">
+          <img src="../../../assets/icons//pe-empty.svg" class="upload-alert-icon" />
+          <div class="upload-alert-message">
+            <p class="custom-message">请上传文件</p>
           </div>
         </div>
       </div>
@@ -31,49 +74,24 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, watch } from 'vue';
-import VuePdfEmbed from 'vue-pdf-embed';
+//导入axios封装包
+import Yu from "../../../utils/axios";
 
-//默认的pdf
-import testpdf1 from '../../../assets/pdfs/1.pdf';
-
-const pdfSource = ref(testpdf1);
+//默认的图片
+const imageUrl = ref(null); // 存储图片的 URL
+import { ElMessage } from "element-plus";
 
 const props = defineProps<{
   activePage: number;
 }>();
 
-const parseObj = ref({
-  设备名称: '1RPEOOIBA冷却剂疏水泵',
-  功能位置: 'ND-4-01-RGL-010AR',
-  缺陷原因: `取工作票，现场确认设备位号及安措正确
-拆卸联轴器螺栓，对中复查同轴度 0.08mm平行度0.03mm不合格
-拆卸泵盖螺栓，将泵憋体脱出运至检修场地，临时开口设备做好封堵拆卸叶轮及机械密封组件，解体轴承箱，消洗检查各零部件，测量泵轴最大0.0...大0.02mm，轴与轴承配合间隙最大0.01mm，轴与叶轮配合间隙0.02mm，体口环与叶回装新轴承及机械密封组件，安装泵叶轮，将泵整体运往现场回装，至工作油位，调整对中同轴度 0.03mm平行度 0.025mm，合格
-回装联轴器及保护單，清理现场
-归还工作票及辐射票完工，修后试验在工单01447934-02中执行`,
-  处理措施: `1RPB002P0 解体检查工作完成`,
-  处理结果: `取工作票，现场确认设备位号及安措正确
-拆卸联轴器螺栓，对中复查同轴度 0.08mm平行度0.03mm不合格
-拆卸泵盖螺栓，将泵憋体脱出运至检修场地，临时开口设备做好封堵拆卸叶轮及机械密封组件，解体轴承箱，消洗检查各零部件，测量泵轴最大0.0...大0.02mm，轴与轴承配合间隙最大0.01mm，轴与叶轮配合间隙0.02mm，体口环与叶回装新轴承及机械密封组件，安装泵叶轮，将泵整体运往现场回装，至工作油位，调整对中同轴度 0.03mm平行度 0.025mm，合格
-回装联轴器及保护單，清理现场
-归还工作票及辐射票完工，修后试验在工单01447934-02中执行`,
-  其他字段1: `取工作票，现场确认设备位号及安措正确
-拆卸联轴器螺栓，对中复查同轴度 0.08mm平行度0.03mm不合格
-拆卸泵盖螺栓，将泵憋体脱出运至检修场地，临时开口设备做好封堵拆卸叶轮及机械密封组件，解体轴承箱，消洗检查各零部件，测量泵轴最大0.0...大0.02mm，轴与轴承配合间隙最大0.01mm，轴与叶轮配合间隙0.02mm，体口环与叶回装新轴承及机械密封组件，安装泵叶轮，将泵整体运往现场回装，至工作油位，调整对中同轴度 0.03mm平行度 0.025mm，合格
-回装联轴器及保护單，清理现场
-归还工作票及辐射票完工，修后试验在工单01447934-02中执行`,
-  我是很长的字段名称: `取工作票，现场确认设备位号及安措正确
-拆卸联轴器螺栓，对`,
-  其他字段2: `取工作票，现场确认设备位号及安措正确
-拆卸联轴器螺栓，对中复查同轴度 0.08mm平行度0.03mm不合格
-拆卸泵盖螺栓，将泵憋体脱出运至检修场地，临时开口设备做好封堵拆卸叶轮及机械密封组件，解体轴承箱，消洗检查各零部件，测量泵轴最大0.0...大0.02mm，轴与轴承配合间隙最大0.01mm，轴与叶轮配合间隙0.02mm，体口环与叶回装新轴承及机械密封组件，安装泵叶轮，将泵整体运往现场回装，至工作油位，调整对中同轴度 0.03mm平行度 0.025mm，合格
-回装联轴器及保护單，清理现场
-归还工作票及辐射票完工，修后试验在工单01447934-02中执行`,
-  其他字段3: `取工作票，现场确认设备位号及安措正确
-拆卸联轴器螺栓，对中复查同轴度 0.08mm平行度0.03mm不合格
-拆卸泵盖螺栓，将泵憋体脱出运至检修场地，临时开口设备做好封堵拆卸叶轮及机械密封组件，解体轴承箱，消洗检查各零部件，测量泵轴最大0.0...大0.02mm，轴与轴承配合间隙最大0.01mm，轴与叶轮配合间隙0.02mm，体口环与叶回装新轴承及机械密封组件，安装泵叶轮，将泵整体运往现场回装，至工作油位，调整对中同轴度 0.03mm平行度 0.025mm，合格
-回装联轴器及保护單，清理现场
-归还工作票及辐射票完工，修后试验在工单01447934-02中执行`,
-});
+const parseObj = reactive({});
+const displayedItems = reactive([]);
+const currentPage = 1  // 当前页
+const pageSize = 1   // 每页条数
+const totalItems = 8  // 总条数
+const imageList = []
+
 
 // 实现pdf缩放
 const scaleFun = computed(() => {
@@ -112,6 +130,13 @@ watch(
   },
 );
 
+//分页功能
+function handleCurrentChange(page) {
+  this.currentPage = page;
+  console.log(`当前页：${page}`);
+  // 在这里可以根据页码请求数据
+}
+
 // box 容器也要跟着变化
 const boxTransform = () => {
   refs.box.value.style.transform = `translate(-50%, -50%) rotate(${scaleData.rotate}deg) scale(${scaleData.scale})`;
@@ -125,25 +150,7 @@ const rolate = () => {
 
 // 鼠标滚轮缩放
 function scaleWheel(e: any) {
-  // if (dy < 0) {
-  //   scaleData.scale -= scaleData.scaleNum;
-  // } else {
-  //   // console.log('放大');
-  //   scaleData.scale += scaleData.scaleNum;
-  // }
-  // // 边界判断
-  // if (scaleData.scale >= scaleData.scaleMax) {
-  //   scaleData.scale = scaleData.scaleMax;
-  //   return;
-  // }
-  // if (scaleData.scale <= scaleData.scaleMin) {
-  //   scaleData.scale = scaleData.scaleMin;
-  //   return;
-  // }
-  // boxTransform();
-  // 禁用默认滚动行为
   e.preventDefault();
-
   const wrapper = refs.wrapper.value; // 获取容器 DOM
   if (!wrapper) return;
 
@@ -213,19 +220,117 @@ function dragstart(e: MouseEvent) {
   });
 };
 
-// 处理文件上传
-const onFileChange = (event: Event) => {
-  const fileInput = event.target as HTMLInputElement;
-  const file = fileInput?.files?.[0];
-  if (file && file.type === 'application/pdf') {
-    const url = URL.createObjectURL(file);
-    pdfSource.value = url; // 更新为用户上传的PDF文件
+// 上传处理函数
+function beforeUpload(file) {
+  // 检查文件类型
+  if (!file.type.match(/^image\/(png|jpe?g)$|application\/(msword|vnd\.openxmlformats-officedocument\.wordprocessingml\.document|pdf|vnd\.oasis\.opendocument\.text|vnd\.ms-excel|vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet)$/)) {
+    ElMessage.error("仅支持以下格式的文件：PNG, JPG, JPEG, DOC, DOCX, PDF, PPT, XLS, XLSX！");
+    return false;
   }
-};
+
+  // 限制文件大小 (50MB)
+  if (file.size > 50 * 1024 * 1024) {
+    ElMessage.error("文件大小不能超过 50MB！");
+    return false;
+  }
+  return true;
+}
+
+async function handleFileChange(file) {
+  //新增筛选代码,修改上传成果两次的bug
+  if (file.status !== 'ready') return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    console.log(e)
+    console.log(e.target)
+    if (e.target?.result) {
+      //如果用户已经选中了一个文件，则将所选文件预览出来，将提示用户上传文件的icon隐藏起来
+      var uc = document.getElementsByClassName('upload-content');
+      var ua = document.getElementsByClassName('upload-alert');
+      var lbd = document.getElementsByClassName('left-box-down');
+      var lbu = document.getElementsByClassName('left-box-up');
+      
+      uc[0].style.display = "none";
+      ua[0].style.display = "none";
+      lbd[0].style.display = "flex"
+      lbu[0].style.backgroundColor = "#DCDFE4";
+      // imageUrl.value = e.target.result;
+      ElMessage.success("文件上传成功！");
+    }
+  };
+  //用户上传文件后调用后端接口
+  // 模拟后端返回的数据
+  let formData = new FormData();
+  formData.append('file', file.raw); // `file.raw` 是 el-upload 提供的文件对象
+  try {
+    // 发送 POST 请求
+    const data = await Yu.post("/upload_document", formData);
+    console.log('上传成功，返回转为图片的列表:', data.data.images);
+    imageUrl.value = "data:image/jpeg;base64," + data.data.images["page_1"];
+    //解析返回结果
+    for(var key in data.data.images){
+      imageList.push(data.data.images[key])
+    }
+  } catch (error) {
+    console.error('上传出错:', error);
+    // 错误处理逻辑，可以弹窗提示或者记录日志
+  }
+
+  Object.assign(parseObj, {name: "张三", age: "25"});
+  fetchData();
+  reader.onerror = () => {
+    ElMessage.error("图片加载失败！");
+  };
+  reader.readAsDataURL(file.raw); // 注意是 file.raw
+}
+
+// TODO:模拟请求数据（延迟模拟后端返回）
+async function fetchData() {
+  setTimeout(() => {
+    renderData(); // 调用逐字渲染函数
+  }, 1000); // 1秒后模拟返回数据
+}
+
+// 渲染逻辑：逐字显示
+async function renderData() {
+  displayedItems.length = 0; // 清空显示数据
+  for(var key in parseObj){
+    const fullKey = key; // 当前 key 的完整文本
+    const fullValue = parseObj[key]; // 当前 value 的完整文本
+
+    const newItem = reactive({ key: "", value: "" }); // 初始化空项
+    displayedItems.push(newItem);
+
+    // 渲染 key 和 value
+    newItem.key = await renderText(fullKey); // 渲染 key
+    newItem.value = await renderText(fullValue); // 渲染 value
+  }
+}
+
+// 辅助函数：逐字渲染文本
+function renderText(text) {
+  return new Promise((resolve) => {
+    let index = 0;
+    let currentText = "";
+
+    const interval = setInterval(() => {
+      currentText += text[index];
+      index++;
+
+      if (index >= text.length) {
+        clearInterval(interval);
+        resolve(currentText); // 渲染完成返回完整文本
+      }
+    }, 300); // 每300ms输出一个字
+  });
+}
 
 </script>
 
 <style scoped lang="scss">
+.custom-message{
+  color: rgb(117, 122, 133);
+}
 .zhjxMain {
   width: 100%;
   height: 100%;
@@ -240,21 +345,22 @@ const onFileChange = (event: Event) => {
     height: 100%;
     margin: 0 auto;
     background-color: #000000;
+    // background-color: #F2F5FA;
     display: flex;
     overflow: hidden;
-    background: linear-gradient(to bottom, #ffffff, #ffffff); /* 可选，便于调试 */
+    background: linear-gradient(to bottom, #F2F5FA, #F2F5FA); /* 可选，便于调试 */
     .left-box {
         width: 50%;
         height: 90%;
       .left-box-up {
         // width: 50%;
         height: 100%;
-        background-color: #c0c0c0;
-        margin-right: 10px;
+        // background-color: #c0c0c0;
+        background-color: #F2F5FA;
         position: relative;
         overflow: hidden;
         .box {
-          // width: 80%;
+          width: 80%;
           // height: 100%;
           object-fit: contain;
           user-select: none; /* 不可选中,为了拖拽时不让文字高亮 */
@@ -265,8 +371,29 @@ const onFileChange = (event: Event) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          .vue-pdf-embed {
+          // .vue-pdf-embed {
+          //   width: 100%;
+          // }
+          .preview-image {
             width: 100%;
+          }
+          .upload-content{
+            display: block;
+            width: 100%;
+            position: relative; /* 确保子元素可以定位 */
+            .upload-icon{
+              position: absolute;
+              left: 50%;  /* 水平居中 */
+              transform: translate(-50%, -50%);
+              width: 60px;
+              height: 60px;
+            }
+            .upload-message{
+              width: 100%;
+              text-align: center;
+              margin-top: 10%;
+            }
+            
           }
         }
         .center {
@@ -282,12 +409,13 @@ const onFileChange = (event: Event) => {
         }
       }
       .left-box-down{
-        // width: 50%;
+        width: 100%;
         height: 10%;
-        display: flex;
+        display: none;
         justify-content: center; /* 水平居中 */
         align-items: center;     /* 垂直居中 */
         position: relative;      /* 确保可以在内部精确定位 */
+        background-color: #f8f9fa;
         .zoomin-wrapper {
           position: absolute;
           // top: 10%;
@@ -298,22 +426,26 @@ const onFileChange = (event: Event) => {
           align-items: center;
           justify-content: center;
           img {
-            width: 60px;
-            height: 60px;
+            margin-top: 10%;
+            width: 30px;
+            height: 30px;
             cursor: pointer;
-            margin: 0 100px;
+            margin: -20px 50px;
           }
+        }
+        .pagination{
+          width: 20%;
         }
       }
     }
     .right-box {
       width: 50%;
       height: 100%;
-      background-color: #000000;
+      background-color: #ffffff;
       margin-left: 10px;
       padding: 10px 0;
       overflow-y: scroll;
-      //   修改滚动条
+      // 修改滚动条
       &::-webkit-scrollbar {
         width: 10px;
       }
@@ -323,7 +455,8 @@ const onFileChange = (event: Event) => {
       }
       .item {
         min-height: 48px;
-        display: flex;
+        // display: flex;
+        display: none;
         padding-right: 50px;
         & + .item {
           margin-top: 10px;
@@ -334,20 +467,38 @@ const onFileChange = (event: Event) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #ffffff;
+          color: rgb(117, 122, 133);
           font-size: 14px;
           font-weight: 600;
           padding: 0 5px;
         }
         .text {
           flex: 1;
-          color: #ffffff;
+          color: #000000;
           background-color: #4977ea;
           border-radius: 10px;
           font-size: 14px;
           font-weight: 600;
           line-height: 24px;
           padding: 10px 20px;
+        }
+      }
+      .upload-alert{
+        display: block;
+        width: 100%;
+        position: relative; /* 确保子元素可以定位 */
+        .upload-alert-icon{
+          position: absolute;
+          left: 50%;  /* 水平居中 */
+          margin-top: -40px;
+          transform: translate(-50%, -50%);
+          width: 60px;
+          height: 60px;
+        }
+        .upload-alert-message{
+          width: 100%;
+          text-align: center;
+          margin-top: 45%;
         }
       }
     }
