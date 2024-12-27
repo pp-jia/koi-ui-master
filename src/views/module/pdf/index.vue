@@ -3,11 +3,24 @@
     <div class="content">
       <!-- 展示容器 -->
       <div class="left-box">
-        <div class="left-box-up" :ref="refs.wrapper" @wheel.capture.prevent="scaleWheel($event)">
-          <div class="box" :ref="refs.box" @mousedown="dragstart($event)">
-            <!-- <vue-pdf-embed :ref="refs.box" :source="pdfSource" :style="scaleFun" class="vue-pdf-embed" :page="activePage" />-->
-             <!-- 显示预览的图片 -->
-            <img v-if="imageUrl" :src="imageUrl" :style="scaleFun" class="preview-image" />
+        <div class="left-box-up" :ref="refs.wrapper" @wheel.capture.prevent="scaleWheel($event)" >
+          <div class="box" :ref="refs.box" >
+            <!-- 显示预览的图片 -->
+            <div class="image_wrapper" :style="scaleFun" :ref="refs.imageWrapper ">
+              <div
+                v-viewer="{movable: true}"
+                v-for="(imageItemUrl, index) in imageList"
+                :key="index"
+                class="mask"
+              >
+                <!-- 动态渲染 img -->
+                <img
+                  v-if="imageItemUrl"
+                  :src="imageItemUrl"
+                  class="preview-image"
+                />  
+              </div>
+            </div>
             <el-upload
               action=""
               :show-file-list="false"
@@ -27,25 +40,23 @@
               </div>
             </el-upload>
           </div>
-          <!-- <input type="file" @change="onFileChange" /> -->
         </div>
         <div class="left-box-down">
           <div class="zoomin-wrapper">
             <img src="../../../assets/icons/pe-bigger.svg" @click="rollBtn('enlarge')" alt="" />
             <img src="../../../assets/icons/pe-smaller.svg" @click="rollBtn('zoomin')" alt="" />
             <img src="../../../assets/icons/pe-inverse.svg" alt="" @click="rolate" />
+            <d-pagination
+              v-model:total="pager.total"
+              v-model:pageSize="pager.pageSize"
+              total-item-text="总页数"
+              v-model:pageIndex="pager.pageIndex"
+              :can-view-total="false"
+              :can-change-page-size="true"
+              :lite="true"
+              @page-index-change="pageIndexChange"
+            />
           </div>
-          <!-- 实现分页 -->
-          <div class="pagination">
-          <el-pagination
-            @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-size="pageSize"
-            :total="totalItems"
-            :small="false"
-            layout="prev, pager, next, jumper"
-          />
-        </div>
           
         </div>
       </div>
@@ -73,33 +84,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, computed, reactive, watch, shallowReactive  } from 'vue';
 //导入axios封装包
 import Yu from "../../../utils/axios";
+import { ElMessage } from "element-plus";
+import { koiMsgError, koiMsgSuccess } from '@/utils/koi';
+import VueViewer from 'v-viewer'
+import { Fullscreen } from 'vue-devui';
 
 //默认的图片
 const imageUrl = ref(null); // 存储图片的 URL
-import { ElMessage } from "element-plus";
-
+const pager = ref({
+  total: 2,
+  pageIndex: 1,
+  pageSize: 1,
+});
 const props = defineProps<{
   activePage: number;
 }>();
-
 const parseObj = reactive({});
 const displayedItems = reactive([]);
-const currentPage = 1  // 当前页
-const pageSize = 1   // 每页条数
-const totalItems = 8  // 总条数
-const imageList = []
-
+let isImage = true
+const imageList = reactive([])
+let i = 0;
 
 // 实现pdf缩放
 const scaleFun = computed(() => {
-  return `transform:scale(${scaleData.scale});transition: all 0.3s;`;
+  // 动态更新 currentMarginBottom
+  if (i == 0){
+    i += 1
+    return `transform:scale(${scaleData.scale});transition: all 0.3s;`;
+  }
+  if (i == 11){
+    i = 1
+  }
+  return `transform:scale(${scaleData.scale});transition: all 0.3s; display: flex;`;
 });
 const refs = {
   wrapper: ref<HTMLElement | null>(null), // pdf外层容器
   box: ref<HTMLElement | null>(null), // pdf容器，用于拖拽
+  imageWrapper: ref<HTMLElement | null>(null),
 };
 const dragData = reactive({
   x: 0, // 拖拽初始化时的x坐标
@@ -111,11 +135,11 @@ const dragData = reactive({
 });
 const scaleData = reactive({
   scale: 1, // 缩放比例
-  scaleNum: 0.1, // 滚轮缩放比例
-  scaleMax: 100, // 最大缩放比例
+  scaleMax: 4, // 最大缩放比例
   scaleMin: 0.1, // 最小缩放比例
-  scaleBtn: 0.4, // 缩放按钮缩放比例
+  scaleBtn: 0.2, // 缩放按钮缩放比例
   rotate: 0, // 旋转角度
+  // currentMarginBottom: 10 // 初始的 margin-bottom
 });
 
 watch(
@@ -131,10 +155,19 @@ watch(
 );
 
 //分页功能
-function handleCurrentChange(page) {
-  this.currentPage = page;
-  console.log(`当前页：${page}`);
-  // 在这里可以根据页码请求数据
+function pageIndexChange(page: number): void {
+  console.log(`当前页码: ${page}`);
+  const imageWrapper = refs.imageWrapper.value; // 获取容器 DOMimageWrapper
+  const wrapper = refs.wrapper.value; // 获取容器 DOM
+  console.log(wrapper)
+  console.log(imageWrapper)
+  if (!wrapper && !imageWrapper) return;
+  // const deltaY = pi[0].style.height; // 滚动方向和距离
+  var deltaY = imageWrapper?.scrollHeight / pager.total
+  console.log(deltaY)
+  const newScrollTop = wrapper.scrollTop + deltaY; // 计算新的滚动位置
+  wrapper.scrollTop = newScrollTop;
+  console.log(wrapper.scrollTop)
 }
 
 // box 容器也要跟着变化
@@ -148,27 +181,6 @@ const rolate = () => {
   boxTransform();
 };
 
-// 鼠标滚轮缩放
-function scaleWheel(e: any) {
-  e.preventDefault();
-  const wrapper = refs.wrapper.value; // 获取容器 DOM
-  if (!wrapper) return;
-
-  const deltaY = e.deltaY; // 滚动方向和距离
-  const newScrollTop = wrapper.scrollTop + deltaY; // 计算新的滚动位置
-
-  // 防止滚动超出边界
-  const maxScrollTop = wrapper.scrollHeight - wrapper.clientHeight;
-  if (newScrollTop < 0) {
-    wrapper.scrollTop = 0;
-  } else if (newScrollTop > maxScrollTop) {
-    wrapper.scrollTop = maxScrollTop;
-  } else {
-    wrapper.scrollTop = newScrollTop;
-  }
-
-  return false;
-};
 
 // 点击放大缩小
 const rollBtn = (action: 'enlarge' | 'zoomin') => {
@@ -188,46 +200,97 @@ const rollBtn = (action: 'enlarge' | 'zoomin') => {
   }
   boxTransform();
 };
+let isRecover = 0;
+// 鼠标滚轮上下滑动
+function scaleWheel(e: any) {
+  e.preventDefault();
+  const wrapper = refs.wrapper.value; // 获取容器 DOM
+  console.log(wrapper)
+  if (!wrapper) return;
+  const deltaY = e.deltaY; // 滚动方向和距离
+  const newScrollTop = wrapper.scrollTop + deltaY; // 计算新的滚动位置
+  // 防止滚动超出边界
+  const maxScrollTop = wrapper.scrollHeight - wrapper.clientHeight;
+  console.log("wrapper.scrollTop :" + wrapper.scrollTop )
+  console.log("maxScrollTop :" + maxScrollTop)
+  if (newScrollTop < 0) {
+    wrapper.scrollTop = 0;
+  } else if (newScrollTop > maxScrollTop) {
+    wrapper.scrollTop = maxScrollTop;
+  } else {
+    wrapper.scrollTop = newScrollTop;
+  }
+  return false;
+};
 
 // 拖拽（box容器拖拽）
 function dragstart(e: MouseEvent) {
+  document.addEventListener('dragstart', (e) => e.preventDefault());
+  console.log("e.button:" + e.button)
+  if (e.button !== 0) return; // 确保只监听鼠标左键
   refs.box.value.style.transition = 'none';
-  e.preventDefault(); // 阻止默认事件
   const box = refs.box.value as HTMLElement;
   const wrapper = refs.wrapper.value as HTMLElement;
+  console.log("scrollTop1:" + wrapper.scrollTop)
   dragData.x = e.pageX - box.offsetLeft;
   dragData.y = e.pageY - box.offsetTop;
-
+  if(isRecover == 1){
+    isRecover = 0
+  }
+  let isMouseDown = true; // 用于记录鼠标是否按下
   // 添加鼠标移动事件
   document.addEventListener('mousemove', move);
-  function move(event: any) {
+  function move(event: MouseEvent) {
+    if (!isMouseDown) return; // 确保只有鼠标按下时执行拖拽操作
     // 计算元素的位置
     dragData.left = event.pageX - dragData.x;
     dragData.top = event.pageY - dragData.y;
-    // 边界判断可以在这里添加 ↓
+    console.log("event.pageY: " + event.pageY)
+    // 防止滚动超出边界
+    console.log("scrollTop2:" + wrapper.scrollTop)
+    console.log("dragData.y:" + dragData.y)
+    if (dragData.top > 0 && wrapper.scrollTop - dragData.top < 0) {
+      // wrapper.scrollTop = 0;
+      return;
+    } else if (dragData.top > wrapper.scrollHeight) {
 
-    // 设置元素的位置
-    box.style.left = dragData.left + 'px';
-    box.style.top = dragData.top + 'px';
+    } else {
+      // 设置元素的位置
+      box.style.left = dragData.left + 'px';
+      box.style.top = dragData.top + 'px';
+    }
   }
-  // 添加鼠标抬起事件，鼠标抬起，将事件移除
-  document.addEventListener('mouseup', function () {
+  // 鼠标抬起事件，移除监听
+  document.addEventListener('mouseup', () => {
+    console.log("1======" + wrapper.scrollTop)
+    console.log("dragData.top======" + dragData.top)
+    if (isRecover == 0){
+      wrapper.scrollTop = wrapper.scrollTop - dragData.top
+      isRecover = 1
+    }
+    console.log("wrapper.scrollTop======" + wrapper.scrollTop)
     document.removeEventListener('mousemove', move);
-  });
-  // 鼠标离开父级元素，把事件移除
-  document.addEventListener('mouseout', function () {
-    document.removeEventListener('mousemove', move);
-  });
-};
+  }, { once: true });
+}
 
 // 上传处理函数
 function beforeUpload(file) {
-  // 检查文件类型
-  if (!file.type.match(/^image\/(png|jpe?g)$|application\/(msword|vnd\.openxmlformats-officedocument\.wordprocessingml\.document|pdf|vnd\.oasis\.opendocument\.text|vnd\.ms-excel|vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet)$/)) {
+  // 检查文件类型，因为我上传图片类型的文件，后端并不会进行处理
+  if (file.type.match(/^image\/(png|jpe?g)$/)) {
+    // 执行图片相关操作
+    // console.log("这是一个图片文件，执行图片操作");
+    isImage = true
+    // 例如上传图片或其他操作
+  } else if (file.type.match(/^application\/(msword|vnd\.openxmlformats-officedocument\.wordprocessingml\.document|pdf|vnd\.openxmlformats-officedocument\.presentationml\.presentation|vnd\.ms-powerpoint|ppt|vnd\.oasis\.opendocument\.text|vnd\.ms-excel|vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet)$/)) {
+    // 执行文档相关操作
+    // console.log("这是一个文档文件，执行文档操作");
+    isImage = false
+    // 例如上传文档或其他操作
+  } else {
+    // 文件类型不符合要求
     ElMessage.error("仅支持以下格式的文件：PNG, JPG, JPEG, DOC, DOCX, PDF, PPT, XLS, XLSX！");
     return false;
   }
-
   // 限制文件大小 (50MB)
   if (file.size > 50 * 1024 * 1024) {
     ElMessage.error("文件大小不能超过 50MB！");
@@ -237,58 +300,78 @@ function beforeUpload(file) {
 }
 
 async function handleFileChange(file) {
+  i = 0
   //新增筛选代码,修改上传成果两次的bug
   if (file.status !== 'ready') return;
   const reader = new FileReader();
+  // const imageFileTemp = null
   reader.onload = (e) => {
-    console.log(e)
-    console.log(e.target)
     if (e.target?.result) {
       //如果用户已经选中了一个文件，则将所选文件预览出来，将提示用户上传文件的icon隐藏起来
       var uc = document.getElementsByClassName('upload-content');
       var ua = document.getElementsByClassName('upload-alert');
       var lbd = document.getElementsByClassName('left-box-down');
       var lbu = document.getElementsByClassName('left-box-up');
+      var iwr = document.getElementsByClassName('image_wrapper');
+      var box = document.getElementsByClassName('box');
       
       uc[0].style.display = "none";
       ua[0].style.display = "none";
+      iwr[0].style.display = "flex";
       lbd[0].style.display = "flex"
+      box[0].style.display = "block";
       lbu[0].style.backgroundColor = "#DCDFE4";
-      // imageUrl.value = e.target.result;
-      ElMessage.success("文件上传成功！");
+
+      if (isImage){
+        imageList.push(e.target.result)
+      }
+      koiMsgSuccess("文件上传成功！");
     }
   };
   //用户上传文件后调用后端接口
-  // 模拟后端返回的数据
   let formData = new FormData();
   formData.append('file', file.raw); // `file.raw` 是 el-upload 提供的文件对象
   try {
     // 发送 POST 请求
     const data = await Yu.post("/upload_document", formData);
-    console.log('上传成功，返回转为图片的列表:', data.data.images);
-    imageUrl.value = "data:image/jpeg;base64," + data.data.images["page_1"];
-    //解析返回结果
-    for(var key in data.data.images){
-      imageList.push(data.data.images[key])
+    if (!isImage){
+      console.log('上传成功，返回转为图片的列表:', data.data.images);
+      imageUrl.value = "data:image/jpeg;base64," + data.data.images["page_1"];
+      var length = 0; // 初始化从后端拿到多少条数据
+      //解析返回结果
+      for (var item in data.data.images) {
+        length++; // 计算 data.data.images 的键数
+      }
+      console.log("图片数量:", length);
+      // 遍历 data.data.images 并将每一张图片的 Base64 数据添加到 imageList 中
+      for (var i = 1; i <= length; i++) {
+        // 拼接键名，比如 "page_1"
+        const key = "page_" + i;
+        // 如果键名存在于 data.data.images 中
+        if (data.data.images[key]) {
+          const base64Image = "data:image/jpeg;base64," + data.data.images[key];
+          console.log("图片地址:", base64Image);
+          // 添加到 imageList 中
+          imageList.push(base64Image);
+        } else {
+          console.warn("未找到键:", key);
+        }
+      }
+      //修改分页组件展示的结果
+      pager.total = length
+      pager.pageIndex = 3
     }
   } catch (error) {
+    koiMsgError("上传出错,请稍后重试！")
     console.error('上传出错:', error);
     // 错误处理逻辑，可以弹窗提示或者记录日志
   }
-
   Object.assign(parseObj, {name: "张三", age: "25"});
-  fetchData();
+  renderData();
   reader.onerror = () => {
     ElMessage.error("图片加载失败！");
   };
   reader.readAsDataURL(file.raw); // 注意是 file.raw
-}
-
-// TODO:模拟请求数据（延迟模拟后端返回）
-async function fetchData() {
-  setTimeout(() => {
-    renderData(); // 调用逐字渲染函数
-  }, 1000); // 1秒后模拟返回数据
 }
 
 // 渲染逻辑：逐字显示
@@ -324,7 +407,6 @@ function renderText(text) {
     }, 300); // 每300ms输出一个字
   });
 }
-
 </script>
 
 <style scoped lang="scss">
@@ -337,13 +419,13 @@ function renderText(text) {
   display: flex;
   flex-direction: column;
   background-color: #000000;
-  overflow-y: auto; /* 纵向滚动 */
-  overflow-x: hidden; /* 禁止横向滚动 */
+  // overflow-y: auto; /* 纵向滚动 */
+  // overflow-x: hidden; /* 禁止横向滚动 */
   overflow: hidden;
   .content {
     width: 100%;
     height: 100%;
-    margin: 0 auto;
+    // margin: 0 auto;
     background-color: #000000;
     // background-color: #F2F5FA;
     display: flex;
@@ -353,33 +435,51 @@ function renderText(text) {
         width: 50%;
         height: 90%;
       .left-box-up {
-        // width: 50%;
+        // width: 100%;
         height: 100%;
         // background-color: #c0c0c0;
         background-color: #F2F5FA;
         position: relative;
         overflow: hidden;
         .box {
-          width: 80%;
-          // height: 100%;
+          width: 90%;
+          height: 100%;  
           object-fit: contain;
           user-select: none; /* 不可选中,为了拖拽时不让文字高亮 */
+          // overflow-y: scroll;
           position: absolute;
-          top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
           display: flex;
           align-items: center;
-          justify-content: center;
-          // .vue-pdf-embed {
-          //   width: 100%;
-          // }
-          .preview-image {
+          justify-content: center; 
+          .image_wrapper{
+            margin-top: 50%;
             width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items:center;
+            .mask {
+              margin-bottom: 10px;
+              width: 100%;
+              height: 100vh; /* 每页高度等于视口高度 */
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              position: relative;
+              border: 1px solid #ddd;
+              background: #f5f5f5; /* 浅色背景 */
+            }
+            .preview-image {
+              width: 100%;
+              height: 100%; /* 图片自适应，但不会超过容器高度 */
+              object-fit: contain;
+            }
           }
           .upload-content{
             display: block;
             width: 100%;
+            margin-top: 150%;
             position: relative; /* 确保子元素可以定位 */
             .upload-icon{
               position: absolute;
@@ -393,19 +493,7 @@ function renderText(text) {
               text-align: center;
               margin-top: 10%;
             }
-            
           }
-        }
-        .center {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-        .bottom-left {
-          position: absolute;
-          bottom: 20px;
-          left: 20px;
         }
       }
       .left-box-down{
@@ -418,7 +506,7 @@ function renderText(text) {
         background-color: #f8f9fa;
         .zoomin-wrapper {
           position: absolute;
-          // top: 10%;
+          top: 50%;
           // right: 20px;
           transform: translateY(-50%);
           display: flex;

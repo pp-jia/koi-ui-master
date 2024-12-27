@@ -155,7 +155,7 @@ class Yu {
     return this.instance.post(url, data, {
       headers: {
         "Content-Type": "multipart/form-data",
-        'Authorization': 'Bearer 123'
+        'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJleHAiOjE3Mzg4Mjc4Mjl9.h2SZN_Ogfdrf15bx2HvSeYnVinhIzWmigMJlightjnE'
       }
     });
   }

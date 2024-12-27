@@ -85,17 +85,17 @@
 }
 
 /* 字体 */
-@font-face {
-  font-family: "KoiFont";
-  src: url("../assets/fonts/KoiFont.woff2");
-  // 字体加载时显示系统字体，字体加载完成后显示自定义字体
-  font-display: swap; 
-}
+// @font-face {
+//   font-family: "KoiFont";
+//   src: url("../assets/fonts/KoiFont.woff2");
+//   // 字体加载时显示系统字体，字体加载完成后显示自定义字体
+//   font-display: swap; 
+// }
 
-/* 管理平台全局样式 */
+/* TODO:管理平台全局样式，如果要修改字体在这里修改 */
 body {
   // 全局字体
-  font-family: "KoiFont", sans-serif;
+  font-family: "SimSun", sans-serif;
   // 鼠标的样式  修改图标
   // cursor: url("../assets/mouse/index.cur"), auto;
   word-break: break-word;

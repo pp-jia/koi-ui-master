@@ -8,6 +8,15 @@ import router from "./routers";
 import ElementPlus from "element-plus";
 // 引入ElementPlus的css
 import "element-plus/dist/index.css";
+//DevUI
+import DevUI from 'vue-devui';
+import 'vue-devui/style.css';
+import { ThemeServiceInit, infinityTheme } from 'devui-theme';
+ThemeServiceInit({ infinityTheme }, 'infinityTheme');
+//V-viewer
+import Viewer from 'v-viewer'
+import 'viewerjs/dist/viewer.css'
+import 'viewerjs/dist/viewer.js'
 // @ts-ignore忽略当前文件ts类型的检测否则有红色提示(打包会失败)
 import zhCn from "element-plus/dist/locale/zh-cn.mjs";
 // 引入ElementPlus所有图标
@@ -33,6 +42,7 @@ import KoiDirectives from "@/directives/index";
 // uncoss防止覆盖ElementPlus 的 el-button的css，所有放置最下方
 import "uno.css";
 
+
 // 创建app
 const app = createApp(App);
 // 注册ElementPlus
@@ -50,6 +60,8 @@ app.use(pinia);
 // 注册I18n
 app.use(I18n);
 // 注册自定义组件
+app.use(Viewer)
+app.use(DevUI)
 app.use(KoiComponents);
 // 注册全局自定义指令
 app.use(KoiDirectives);
