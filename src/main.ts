@@ -16,7 +16,7 @@ ThemeServiceInit({ infinityTheme }, 'infinityTheme');
 //V-viewer
 import Viewer from 'v-viewer'
 import 'viewerjs/dist/viewer.css'
-import 'viewerjs/dist/viewer.js'
+// import 'viewerjs/dist/viewer.js'
 // @ts-ignore忽略当前文件ts类型的检测否则有红色提示(打包会失败)
 import zhCn from "element-plus/dist/locale/zh-cn.mjs";
 // 引入ElementPlus所有图标
