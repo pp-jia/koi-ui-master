@@ -18,26 +18,6 @@ const activities = [
     timestamp: "2023-11-23 18:00:00",
     type: "success"
   },
-  {
-    content: "四种布局方式，多种主题",
-    timestamp: "2023-11-23 18:00:00",
-    type: "warning"
-  },
-  {
-    content: "ElementPlus + Vue3 + TypeScript + Pinia",
-    timestamp: "2023-11-23 18:00:00",
-    type: "info"
-  },
-  {
-    content: "欢迎大家star和fork，喜欢的可以捐献哟🌻",
-    timestamp: "2023-11-23 18:00:00",
-    type: "danger"
-  },
-  {
-    content: "欢迎大家star和fork，喜欢的可以捐献哟🌻",
-    timestamp: "2023-11-23 18:00:00",
-    type: "danger"
-  }
 ];
 </script>
 

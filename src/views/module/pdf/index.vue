@@ -1,6 +1,9 @@
 <template>
   <div class="zhjxMain">
     <div class="content">
+      <div class="max-left">
+          <nvigation></nvigation>
+      </div>
       <!-- 展示容器 -->
       <div class="left-box">
         <div class="left-box-up" :ref="refs.wrapper" @wheel.capture.prevent="scaleWheel($event)" >
@@ -25,14 +28,14 @@
               :show-file-list="false"
               :before-upload="beforeUpload"
               :on-change="handleFileChange"
-              accept=".png, .jpg, .jpeg, .doc, .docx, .pdf, .ppt, .xls, .xlsx"
+              accept=".png, .jpg, .jpeg, .doc, .docx, .pdf, .xls, .xlsx"
             >
               <div class="upload-content">
                 <img src="../../../assets/icons/pe-upload-2.svg" class="upload-icon" />
                 <div class="upload-message">
-                  <p>点击上传文件 / 拖拽文件到此处 / 截图后Ctrl+V</p>
+                  <p>点击上传文件</p>
                   <p class="custom-message">
-                    支持 png, jpg, jpeg, doc, docx, pdf, ppt, xlsx, xls 等格式，<br />
+                    支持 png, jpg, jpeg, doc, docx, pdf, xlsx, xls 等格式，<br />
                     上传单个文件大小不超过 50M
                   </p>
                 </div>
@@ -72,54 +75,188 @@
             <input v-model="entry.value" /> 
           </div>
         </div> -->
-        <div class="PeTableContainer">
+        <div>
           <d-table
             ref="tableRef"
-            size="md"
+            size="sm"
             header-bg="true"
             border-type="bordered"
-            :data="data"
-            table-height="500px"
-            row-key="id"
+            :data="PriceData"
+            :show-loading="showLoading"
+            table-height="450px"
+            row-key="productName"
             @cellClick="cellClick"
+            @row-click="onRowClick"
+            @check-change="checkChange"
+            @check-all-change="checkAllChange"
           >
-            <d-column type="checkable" width="40" :checkable="checkable" reserve-check></d-column>
-            <d-column field="firstName" header="First Name" type="editable">
+            <d-column type="checkable" :checkable="checkable" align="center" width="40px" fixed-left="0px" reserve-check></d-column>
+
+            <!-- ID -->
+            <d-column type="index" align="center" header="序号" width="80px">
+
+            </d-column>
+            <!-- 产品名称 -->
+            <d-column field="productName" header="产品名称" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
               <template #cell="scope">
-                {{ scope.row.firstName }}
+                {{ scope.row.productName }}
               </template>
               <template #cellEdit="scope">
                 <d-input
-                  ref="firstNameRef"
-                  v-model="scope.row.firstName"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'firstName', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'firstName')"
+                  ref="refMap.productNameRef"
+                  v-model="scope.row.productName"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'productName', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'productName')"
                 />
               </template>
             </d-column>
-            <d-column field="lastName" header="Last Name" type="editable">
+
+            <!-- 型号 -->
+            <d-column field="model" header="型号" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
               <template #cell="scope">
-                {{ scope.row.lastName }}
+                {{ scope.row.model }}
               </template>
               <template #cellEdit="scope">
                 <d-input
-                  ref="lastNameRef"
-                  v-model="scope.row.lastName"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'lastName', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'lastName')"
+                  ref="refMap.modelRef"
+                  v-model="scope.row.model"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'model', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'model')"
                 />
               </template>
             </d-column>
-            <d-column field="gender" header="Gender" type="editable">
+
+            <!-- 规格 -->
+            <d-column field="spec" header="规格" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
               <template #cell="scope">
-                {{ scope.row.gender }}
+                {{ scope.row.spec }}
               </template>
               <template #cellEdit="scope">
-                <d-select
-                  ref="genderRef"
-                  v-model="scope.row.gender"
-                  :options="options"
-                  @valueChange="(value) => change(scope.row, scope.rowIndex, 'gender', value)"
+                <d-input
+                  ref="refMap.specRef"
+                  v-model="scope.row.spec"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'spec', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'spec')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 参数 -->
+            <d-column field="parameters" header="参数" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.parameters }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.parametersRef"
+                  v-model="scope.row.parameters"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'parameters', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'parameters')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 供应商 -->
+            <d-column field="supplier" header="供应商/研制厂家" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.supplier }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.supplierRef"
+                  v-model="scope.row.supplier"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'supplier', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'supplier')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 报价 -->
+            <d-column field="bidPrice" header="申报价格" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.bidPrice }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.bidPriceRef"
+                  v-model="scope.row.bidPrice"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'bidPrice', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'bidPrice')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 审批价 -->
+            <d-column field="approvedPrice" header="项目审核价格" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.approvedPrice }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.approvedPriceRef"
+                  v-model="scope.row.approvedPrice"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'approvedPrice', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'approvedPrice')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 审批状态 -->
+            <d-column field="approvalStatus" header="审定价" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.approvalStatus }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.approvalStatusRef"
+                  v-model="scope.row.approvalStatus"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'approvalStatus', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'approvalStatus')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 参考价 -->
+            <d-column field="referencePrice" header="其他参考价" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.referencePrice }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.referencePriceRef"
+                  v-model="scope.row.referencePrice"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'referencePrice', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'referencePrice')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 时间 -->
+            <d-column field="time" header="时间" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.time }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.timeRef"
+                  v-model="scope.row.time"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'time', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'time')"
+                />
+              </template>
+            </d-column>
+
+            <!-- 项目名称 -->
+            <d-column field="projectName" header="项目名称" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
+              <template #cell="scope">
+                {{ scope.row.projectName }}
+              </template>
+              <template #cellEdit="scope">
+                <d-input
+                  ref="refMap.projectNameRef"
+                  v-model="scope.row.projectName"
+                  @change="(value) => change(scope.row, scope.rowIndex, 'projectName', value)"
+                  @blur="() => blur(scope.row, scope.rowIndex, 'projectName')"
                 />
               </template>
             </d-column>
@@ -128,38 +265,102 @@
             </template>
           </d-table>
         </div>
+        <!-- 数据表格 -->
+        <div class="PeTableContainer">
+          <el-table
+            v-loading="loading"
+            border
+            :data="PriceData"
+            empty-text="暂时没有数据哟🌻"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column label="序号" prop="operId" width="70px" align="center" type="index"></el-table-column>
+            <el-table-column
+              label="产品名称"
+              prop="productName"
+              width="180px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="型号"
+              prop="model"
+              width="120px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="规格"
+              prop="spec"
+              width="120px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="参数"
+              prop="parameters"
+              width="120px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="供应商/制造厂商"
+              prop="supplier"
+              width="200px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="申报价格"
+              prop="bidPrice"
+              width="100px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="项目审核价格"
+              prop="approvedPrice"
+              width="120px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="审定价"
+              prop="approvalStatus"
+              width="100px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="其他参考价"
+              prop="referencePrice"
+              width="120px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="时间"
+              prop="time"
+              width="180px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+            <el-table-column
+              label="项目名称"
+              prop="projectName"
+              width="200px"
+              align="center"
+              :show-overflow-tooltip="true"
+            ></el-table-column>
+          </el-table>
+        </div>
+
         <div class="upload-alert">
           <img src="../../../assets/icons//pe-empty.svg" class="upload-alert-icon"/>
           <div class="upload-alert-message">
             <p class="custom-message">请上传文件</p>
           </div>
-        </div>
-
-        <div class="fieldContainer">
-          <span class="fieldLabel">文本字段:</span>
-          <el-tag
-            v-for="tag in fieldsAlert"
-            :key="tag"
-            type="primary"
-            style="margin-right: 5px; " 
-            closable
-            :disable-transitions="false"
-            @close="handleClose(tag)"
-          >
-            {{ tag }}
-          </el-tag>
-          <el-input
-            v-if="inputVisible"
-            ref="InputRef"
-            v-model="inputValue"
-            class="w-20"
-            size="small"
-            @keyup.enter="handleInputConfirm"
-            @blur="handleInputConfirm"
-          />
-          <el-button v-else class="button-new-tag" size="small" @click="showInput">
-            添加字段
-          </el-button>
         </div>
         
         <div class="fieldHeadContainer">
@@ -191,7 +392,7 @@
         
         <div class="AddStoreButton">
           <el-button type="primary" icon="" @click="handleSaveClick" plain >暂存结果</el-button>
-          <el-button type="primary" icon="Upload" @click="handleClick" :loading=showLoading>入库</el-button>
+          <el-button type="primary" icon="Upload" @click="handleClick">入库</el-button>
         </div>
       </div>
     </div>
@@ -204,6 +405,7 @@ import { ref, computed, reactive, watch, nextTick} from 'vue';
 import Yu from "../../../utils/axios";
 import { koiMsgError, koiMsgSuccess, koiMsgBox, koiNoticeSuccess } from '@/utils/koi';
 import type { InputInstance } from 'element-plus'
+import nvigation from "./nvigation.vue"
 
 //默认的图片
 const imageUrl = ref(null); // 存储图片的 URL
@@ -215,7 +417,6 @@ const pager = reactive({
 const props = defineProps<{
   activePage: number;
 }>();
-const parseObj = reactive({});
 const displayedItems = reactive([]);
 let isImage = true
 let isAllow = true
@@ -270,93 +471,238 @@ watch(
 );
 //实现右侧表单
 const tableRef = ref();
-const data = ref([
+const PriceData = ref([
 {
-  firstName: 'Mark',
-  lastName: 'Otto',
-  gender: 'Male',
-  id: 'Mark',
-},
-{
-  firstName: 'Jacob',
-  lastName: 'Thornton',
-  gender: 'Female',
-  id: 'Jacob',
-},
-{
-  firstName: 'Mark',
-  lastName: 'Otto',
-  gender: 'Male',
-  id: 'Mark',
-},
-{
-  firstName: 'Jacob',
-  lastName: 'Thornton',
-  gender: 'Female',
-  id: 'Jacob',
-},
-{
-  firstName: 'Mark',
-  lastName: 'Otto',
-  gender: 'Male',
-  id: 'Mark',
-},
-{
-  firstName: 'Jacob',
-  lastName: 'Thornton',
-  gender: 'Female',
-  id: 'Jacob',
-},
-{
-  firstName: 'Mark',
-  lastName: 'Otto',
-  gender: 'Male',
-  id: 'Mark',
-},
-{
-  firstName: 'Jacob',
-  lastName: 'Thornton',
-  gender: 'Female',
-  id: 'Jacob',
-},
-{
-  firstName: 'Mark',
-  lastName: 'Otto',
-  gender: 'Male',
-  id: 'Mark',
-},
-{
-  firstName: 'Jacob',
-  lastName: 'Thornton',
-  gender: 'Female',
-  id: 'Jacob',
-},
+  productName: "激光测距仪",
+    model: "LX-500",
+    spec: "高精度",
+    parameters: {
+      "测量量程": "0.15-60m",
+      "激光参数": "635纳米",
+      "激光等级": "2级"
+    },
+    supplier: "XXX科技有限公司",
+    bidPrice: 320000,
+    approvedPrice: 320000,
+    approvalStatus: "通过",
+    referencePrice: null,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "工业无人机",
+    model: "DR-900",
+    spec: "标配",
+    parameters: {
+      '空载转速（米/分钟）': "0-192",
+      "测量量程": "1-20km",
+      "最大续航时间": "120分钟"
+    },
+    supplier: "YYY无人机厂商",
+    bidPrice: 400000,
+    approvedPrice: 380000,
+    approvalStatus: "调整",
+    referencePrice: 395000,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "热成像仪",
+    model: "HT-700",
+    spec: "红外",
+    parameters: {
+      "分辨率": "640x480",
+      "测温范围": "-20°C 至 600°C",
+      "焦距": "25mm"
+    },
+    supplier: "ZZZ电子设备厂",
+    bidPrice: 310000,
+    approvedPrice: 310000,
+    approvalStatus: "通过",
+    referencePrice: null,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "零星耗材",
+    model: "ABC",
+    spec: "普通",
+    parameters: {
+      "材质": "塑料",
+      "包装规格": "100个/批",
+      "颜色": "随机"
+    },
+    supplier: "供应链A公司",
+    bidPrice: 280000,
+    approvedPrice: 280000,
+    approvalStatus: "通过",
+    referencePrice: 285000,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "智能分析系统",
+    model: "AAA-Tech",
+    spec: "旗舰版",
+    parameters: {
+      "运算能力": "1000TFLOPS",
+      "存储容量": "2PB",
+      "网络接口": "10GbE"
+    },
+    supplier: "科技研发X企业",
+    bidPrice: 880000,
+    approvedPrice: 800000,
+    approvalStatus: "调整",
+    referencePrice: 850000,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "便携式气象站",
+    model: "WX-P800",
+    spec: "高端",
+    parameters: {
+      "风速测量范围": "0.3-30m/s",
+      "温度测量范围": "-40°C 至 60°C",
+      "湿度测量范围": "0-100%"
+    },
+    supplier: "气象设备B厂商",
+    bidPrice: 360000,
+    approvedPrice: 360000,
+    approvalStatus: "通过",
+    referencePrice: null,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "自动化生产设备",
+    model: "XZ-300",
+    spec: "定制",
+    parameters: {
+      "生产速度": "60件/小时",
+      "电压": "220V",
+      "功率": "15kW"
+    },
+    supplier: "工业C制造商",
+    bidPrice: 950000,
+    approvedPrice: 940000,
+    approvalStatus: "调整",
+    referencePrice: null,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "高精度激光测量仪",
+    model: "LaserX-900",
+    spec: "增强版",
+    parameters: {
+      "测量量程": "0.05-120m",
+      "精度": "±1mm",
+      "激光等级": "2级"
+    },
+    supplier: "精密仪器D公司",
+    bidPrice: 480000,
+    approvedPrice: 470000,
+    approvalStatus: "通过",
+    referencePrice: 490000,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "移动式水质监测站",
+    model: "Water-Q300",
+    spec: "标准版",
+    parameters: {
+      "监测范围": "pH, COD, BOD",
+      "电池续航时间": "8小时",
+      "数据传输方式": "无线"
+    },
+    supplier: "环保设备E供应商",
+    bidPrice: 720000,
+    approvedPrice: 700000,
+    approvalStatus: "调整",
+    referencePrice: 750000,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  },
+  {
+    productName: "高速数据处理服务器",
+    model: "DataCore-5000",
+    spec: "旗舰版",
+    parameters: {
+      "CPU": "128核",
+      "内存": "2TB",
+      "存储容量": "10PB"
+    },
+    supplier: "服务器制造F企业",
+    bidPrice: 1200000,
+    approvedPrice: 1150000,
+    approvalStatus: "通过",
+    referencePrice: 1250000,
+    time: "2025-01-09 01:31:34",
+    projectName: "1"
+  }
 ]);
 
-//表单填写时的提示
-const options = ref(['Female', 'Male']);
+
 //入库按钮和暂存结果按钮
 const showLoading = ref(false);
 
 const change = (row, rowIndex, field, value) => {
-  data.value[rowIndex][field] = typeof value === 'object' ? value.value : value;
+  PriceData.value[rowIndex][field] = typeof value === 'object' ? value.value : value;
   tableRef.value.store.setCellMode(row, rowIndex, field, 'readonly');
 };
 const blur = (row, rowIndex, field) => {
   tableRef.value.store.setCellMode(row, rowIndex, field, 'readonly');
 };
 
-const cellClick = (obj) => {
-tableRef.value.store.setCellMode(obj.row, obj.rowIndex, obj.column.field, 'edit');
-const refMap = {
-  firstName: firstNameRef,
-  lastName: lastNameRef,
-  gender: genderRef,
+
+const onRowClick = (params) => {
+  console.log('row-click', params);
 };
-const targetRef = refMap[obj.column.field];
-nextTick(() => {
-  targetRef?.value?.focus();
-});
+
+const checkChange = (checked, row, selection) => {
+  console.log('checked row:', checked, row, selection);
+};
+
+const checkAllChange = (checked, selection) => {
+  console.log('checked:', checked, selection);
+};
+
+const toggleRow = () => {
+  tableRef.value.store.toggleRowSelection(PriceData.value[0]);
+};
+
+const cellClick = (obj) => {
+  tableRef.value.store.setCellMode(obj.row, obj.rowIndex, obj.column.field, 'edit');
+  const productNameRef = ref(null);
+  const modelRef = ref(null);
+  const specRef = ref(null);
+  const parametersRef = ref(null);
+  const supplierRef = ref(null);
+  const bidPriceRef = ref(null);
+  const approvedPriceRef = ref(null);
+  const approvalStatusRef = ref(null);
+  const referencePriceRef = ref(null);
+  const timeRef = ref(null);
+  const projectNameRef = ref(null);
+  const refMap = {
+    productName: productNameRef,
+    model: modelRef,
+    spec: specRef,
+    parameters: parametersRef,
+    supplier: supplierRef,
+    bidPrice: bidPriceRef,
+    approvedPrice: approvedPriceRef,
+    approvalStatus: approvalStatusRef,
+    referencePrice: referencePriceRef,
+    time: timeRef,
+    projectName: projectNameRef,
+  };
+  const targetRef = refMap[obj.column.field];
+  nextTick(() => {
+    targetRef?.value?.focus();
+  });
 };
 
 
@@ -388,10 +734,6 @@ const handleInputConfirm = () => {
 const handleClick = () => {
   koiMsgBox("是否确定执行入库操作？")
   .then(async () => {
-    showLoading.value = true;
-    setTimeout(() => {
-      showLoading.value = false;
-    }, 2000);
     koiNoticeSuccess("入库成功!")
     console.log(tableRef.value.store.getCheckedRows());
   })
@@ -550,13 +892,13 @@ async function beforeUpload(file) {
     // 例如上传文档或其他操作
   } else {
     // 文件类型不符合要求
-    koiMsgError("仅支持以下格式的文件：PNG, JPG, JPEG, DOC, DOCX, PDF, PPT, XLS, XLSX！");
+    koiMsgError("仅支持以下格式的文件：PNG, JPG, JPEG, DOC, DOCX, PDF, XLS, XLSX！");
     isAllow = false
     return false;
   }
   // 限制文件大小 (50MB)
-  if (file.size > 50 * 1024 * 1024) {
-    koiMsgError("文件大小不能超过 50MB！");
+  if (file.size > 500 * 1024 * 1024) {
+    koiMsgError("文件大小不能超过 500MB！");
     return false;
   }
   return false;
@@ -581,7 +923,6 @@ async function handleFileChange(file) {
       var lbu = document.getElementsByClassName('left-box-up');
       var iwr = document.getElementsByClassName('image_wrapper');
       var box = document.getElementsByClassName('box');
-      var fc = document.getElementsByClassName('fieldContainer');
       var fhc = document.getElementsByClassName('fieldHeadContainer');
       
       uc[0].style.display = "none";
@@ -592,10 +933,10 @@ async function handleFileChange(file) {
       table[0].style.display = "block"
       addbut[0].style.display = "flex";
       lbu[0].style.backgroundColor = "#DCDFE4";
-      fc[0].style.display = "flex";
       fhc[0].style.display = "flex";
 
       if (isImage){
+        console.log("我是图片")
         imageList.push(e.target.result)
       }
       koiMsgSuccess("文件上传成功！");
@@ -606,7 +947,8 @@ async function handleFileChange(file) {
   formData.append('file', file.raw); // `file.raw` 是 el-upload 提供的文件对象
   try {
     // 发送 POST 请求
-    const data = await Yu.post("/upload_document", formData);
+    //TODO:0105，我现在连接不到后端，所以我只能上传图片
+    // const data = await Yu.post("/upload_document", formData);
     if (!isImage){
       console.log('上传成功，返回转为图片的列表:', data.data.images);
       imageUrl.value = "data:image/jpeg;base64," + data.data.images["page_1"];
@@ -635,6 +977,10 @@ async function handleFileChange(file) {
       console.log("totalImages: " + totalImages)
       pager.total = totalImages
       pager.pageIndex = 1
+    }else{
+      totalImages = 1
+      pager.total = totalImages
+      pager.pageIndex = 1
     }
   } catch (error) {
     koiMsgError("上传出错,请稍后重试！")
@@ -642,7 +988,13 @@ async function handleFileChange(file) {
     // 错误处理逻辑，可以弹窗提示或者记录日志
   }
   // TODO:添加解析抽取结果函数
-  Object.assign(parseObj, {name: "张三", age: "25"});
+  showLoading.value = true;
+  setTimeout(() => {
+    showLoading.value = false;
+  }, 2000);
+  
+  // Object.assign(PriceData, {name: "张三", age: "25"});
+
   renderData();
   reader.onerror = () => {
     koiMsgError("图片加载失败！");
@@ -706,6 +1058,11 @@ function renderText(text) {
     display: flex;
     overflow: hidden;
     background: linear-gradient(to bottom, #F2F5FA, #F2F5FA); /* 可选，便于调试 */
+    .max-left{
+      width: 30%;
+      padding-right: 5px;
+      background-color: #ffffff;
+    }
     .left-box {
         width: 50%;
         height: 90%;
@@ -806,7 +1163,7 @@ function renderText(text) {
       height: 100%;
       background-color: #ffffff;
       margin-left: 10px;
-      padding: 10px 0;
+      padding: 0px 2px;
       overflow-y: scroll;
       position: relative;
       // 修改滚动条
@@ -848,28 +1205,29 @@ function renderText(text) {
       //   }
       // }
       .PeTableContainer{
+        height: 80%;
         margin: 0px 2px;
         display: none;
       }
-      .fieldContainer {
-        position: absolute;
-        width: 100%;
-        bottom: 100px;
-        display: none; /* 设置为水平排列 */
-        align-items: center; /* 垂直居中对齐 */
-        flex-wrap: wrap; /* 允许子元素换行 */
-        border: 1px solid rgb(202, 202, 203); /* 边框颜色和宽度 */
-        border-radius: 8px; /* 圆角半径 */
-        padding: 7px; /* 内边距 */
-        margin-bottom: 5px;
-        .fieldLabel {
-          margin-right: 10px; /* 和输入区域的间距 */
-        }
-      }
+      // .fieldContainer {
+      //   position: absolute;
+      //   width: 100%;
+      //   bottom: 100px;
+      //   display: none; /* 设置为水平排列 */
+      //   align-items: center; /* 垂直居中对齐 */
+      //   flex-wrap: wrap; /* 允许子元素换行 */
+      //   border: 1px solid rgb(202, 202, 203); /* 边框颜色和宽度 */
+      //   border-radius: 8px; /* 圆角半径 */
+      //   padding: 7px; /* 内边距 */
+      //   margin-bottom: 5px;
+      //   .fieldLabel {
+      //     margin-right: 10px; /* 和输入区域的间距 */
+      //   }
+      // }
       .fieldHeadContainer{
         position: absolute;
         width: 100%;
-        bottom: 60px;
+        bottom: 55px;
         display: none; /* 设置为水平排列 */
         align-items: center; /* 垂直居中对齐 */
         flex-wrap: wrap; /* 允许子元素换行 */
@@ -891,6 +1249,7 @@ function renderText(text) {
         display: block;
         width: 100%;
         position: relative; /* 确保子元素可以定位 */
+        bottom: -75px;
         .upload-alert-icon{
           position: absolute;
           left: 50%;  /* 水平居中 */
