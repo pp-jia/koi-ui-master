@@ -75,214 +75,34 @@
             <input v-model="entry.value" /> 
           </div>
         </div> -->
-        <div>
-          <d-table
-            ref="tableRef"
-            size="sm"
-            header-bg="true"
-            border-type="bordered"
-            :data="PriceData"
-            :show-loading="showLoading"
-            table-height="450px"
-            row-key="productName"
-            @cellClick="cellClick"
-            @row-click="onRowClick"
-            @check-change="checkChange"
-            @check-all-change="checkAllChange"
-          >
-            <d-column type="checkable" :checkable="checkable" align="center" width="40px" fixed-left="0px" reserve-check></d-column>
-
-            <!-- ID -->
-            <d-column type="index" align="center" header="序号" width="80px">
-
-            </d-column>
-            <!-- 产品名称 -->
-            <d-column field="productName" header="产品名称" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.productName }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.productNameRef"
-                  v-model="scope.row.productName"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'productName', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'productName')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 型号 -->
-            <d-column field="model" header="型号" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.model }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.modelRef"
-                  v-model="scope.row.model"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'model', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'model')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 规格 -->
-            <d-column field="spec" header="规格" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.spec }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.specRef"
-                  v-model="scope.row.spec"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'spec', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'spec')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 参数 -->
-            <d-column field="parameters" header="参数" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.parameters }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.parametersRef"
-                  v-model="scope.row.parameters"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'parameters', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'parameters')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 供应商 -->
-            <d-column field="supplier" header="供应商/研制厂家" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.supplier }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.supplierRef"
-                  v-model="scope.row.supplier"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'supplier', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'supplier')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 报价 -->
-            <d-column field="bidPrice" header="申报价格" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.bidPrice }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.bidPriceRef"
-                  v-model="scope.row.bidPrice"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'bidPrice', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'bidPrice')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 审批价 -->
-            <d-column field="approvedPrice" header="项目审核价格" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.approvedPrice }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.approvedPriceRef"
-                  v-model="scope.row.approvedPrice"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'approvedPrice', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'approvedPrice')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 审批状态 -->
-            <d-column field="approvalStatus" header="审定价" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.approvalStatus }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.approvalStatusRef"
-                  v-model="scope.row.approvalStatus"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'approvalStatus', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'approvalStatus')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 参考价 -->
-            <d-column field="referencePrice" header="其他参考价" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.referencePrice }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.referencePriceRef"
-                  v-model="scope.row.referencePrice"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'referencePrice', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'referencePrice')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 时间 -->
-            <d-column field="time" header="时间" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.time }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.timeRef"
-                  v-model="scope.row.time"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'time', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'time')"
-                />
-              </template>
-            </d-column>
-
-            <!-- 项目名称 -->
-            <d-column field="projectName" header="项目名称" type="editable" align="center" :show-overflow-tooltip="true" width="150px" resizeable>
-              <template #cell="scope">
-                {{ scope.row.projectName }}
-              </template>
-              <template #cellEdit="scope">
-                <d-input
-                  ref="refMap.projectNameRef"
-                  v-model="scope.row.projectName"
-                  @change="(value) => change(scope.row, scope.rowIndex, 'projectName', value)"
-                  @blur="() => blur(scope.row, scope.rowIndex, 'projectName')"
-                />
-              </template>
-            </d-column>
-            <template #empty>
-              <div style="text-align: center;">No Data</div>
-            </template>
-          </d-table>
-        </div>
         <!-- 数据表格 -->
         <div class="PeTableContainer">
           <el-table
-            v-loading="loading"
+            v-loading="showLoading"
+            height="450px"
+            stripe
             border
             :data="PriceData"
             empty-text="暂时没有数据哟🌻"
+            @cell-mouse-enter="handleCellEnter"
+            @cell-mouse-leave="handleCellLeave"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="55" align="center" />
+            <el-table-column fixed type="selection" width="55" align="center" />
             <el-table-column label="序号" prop="operId" width="70px" align="center" type="index"></el-table-column>
             <el-table-column
               label="产品名称"
               prop="productName"
               width="180px"
               align="center"
-              :show-overflow-tooltip="true"
-            ></el-table-column>
+              :show-overflow-tooltip="true">
+
+              <!-- <template slot-scope="scope">
+                <el-input v-if="scope.row.isEdit" class="item" v-model="scope.row.date" placeholder="请输入内容"></el-input>
+                <div v-else class="txt">{{scope.row.date}}</div>
+              </template> -->
+            </el-table-column>
+
             <el-table-column
               label="型号"
               prop="model"
@@ -441,14 +261,14 @@ const refs = {
   box: ref<HTMLElement | null>(null), // pdf容器，用于拖拽
   imageWrapper: ref<HTMLElement | null>(null),
 };
-const dragData = reactive({
-  x: 0, // 拖拽初始化时的x坐标
-  y: 0, // 拖拽初始化时的y坐标
-  left: 0, // 拖拽结束时的x偏移量
-  top: 0, // 拖拽结束时的y偏移量
-  firstX: 0, // 初始x坐标
-  firstY: 0, // 初始y坐标
-});
+// const dragData = reactive({
+//   x: 0, // 拖拽初始化时的x坐标
+//   y: 0, // 拖拽初始化时的y坐标
+//   left: 0, // 拖拽结束时的x偏移量
+//   top: 0, // 拖拽结束时的y偏移量
+//   firstX: 0, // 初始x坐标
+//   firstY: 0, // 初始y坐标
+// });
 const scaleData = reactive({
   scale: 1, // 缩放比例
   scaleMax: 4, // 最大缩放比例
@@ -648,63 +468,13 @@ const PriceData = ref([
 //入库按钮和暂存结果按钮
 const showLoading = ref(false);
 
-const change = (row, rowIndex, field, value) => {
-  PriceData.value[rowIndex][field] = typeof value === 'object' ? value.value : value;
-  tableRef.value.store.setCellMode(row, rowIndex, field, 'readonly');
-};
-const blur = (row, rowIndex, field) => {
-  tableRef.value.store.setCellMode(row, rowIndex, field, 'readonly');
-};
-
-
-const onRowClick = (params) => {
-  console.log('row-click', params);
-};
-
-const checkChange = (checked, row, selection) => {
-  console.log('checked row:', checked, row, selection);
-};
-
-const checkAllChange = (checked, selection) => {
-  console.log('checked:', checked, selection);
-};
-
-const toggleRow = () => {
-  tableRef.value.store.toggleRowSelection(PriceData.value[0]);
-};
-
-const cellClick = (obj) => {
-  tableRef.value.store.setCellMode(obj.row, obj.rowIndex, obj.column.field, 'edit');
-  const productNameRef = ref(null);
-  const modelRef = ref(null);
-  const specRef = ref(null);
-  const parametersRef = ref(null);
-  const supplierRef = ref(null);
-  const bidPriceRef = ref(null);
-  const approvedPriceRef = ref(null);
-  const approvalStatusRef = ref(null);
-  const referencePriceRef = ref(null);
-  const timeRef = ref(null);
-  const projectNameRef = ref(null);
-  const refMap = {
-    productName: productNameRef,
-    model: modelRef,
-    spec: specRef,
-    parameters: parametersRef,
-    supplier: supplierRef,
-    bidPrice: bidPriceRef,
-    approvedPrice: approvedPriceRef,
-    approvalStatus: approvalStatusRef,
-    referencePrice: referencePriceRef,
-    time: timeRef,
-    projectName: projectNameRef,
-  };
-  const targetRef = refMap[obj.column.field];
-  nextTick(() => {
-    targetRef?.value?.focus();
-  });
-};
-
+function handleCellEnter (row, column, cell, event) {
+  row.isEdit = true
+}
+/** 鼠标移出cell */
+function handleCellLeave (row, column, cell, event) {
+  row.isEdit = false
+}
 
 //右侧下方的字段列表
 //字段选择
