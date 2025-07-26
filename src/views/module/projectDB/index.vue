@@ -3,34 +3,34 @@
     <KoiCard>
       <!-- 搜索条件 -->
       <el-form v-show="showSearch" :inline="true">
-        <el-form-item label="产品名称" prop="operName">
+        <el-form-item label="项目名称" prop="operName" style="align-items: center">
           <el-input
-            placeholder="请输入产品名称"
+            placeholder="请输入操作名称"
             v-model="searchParams.operName"
-            style="width: 200px"
+            style="width: 150px;height: 30px;"
             clearable
             @keyup.enter.native="handleListPage"
           ></el-input>
         </el-form-item>
-        <el-form-item label="供应商/制造厂商" prop="operIp">
+        <el-form-item label="单位名称" prop="operIp" style="align-items: center;">
           <el-input
-            placeholder="请输入供应商/制造厂商"
+            placeholder="请输入单位名称"
             v-model="searchParams.operIp"
-            style="width: 200px"
+            style="width: 150px;height: 30px;"
             clearable
             @keyup.enter.native="handleListPage"
           ></el-input>
         </el-form-item>
-        <el-form-item label="项目名称" prop="operMan">
+        <el-form-item label="操作人员" prop="operMan" style="align-items: center;">
           <el-input
-            placeholder="请输入项目名称"
+            placeholder="请输入操作人员"
             v-model="searchParams.operMan"
-            style="width: 200px"
+            style="width: 150px;height: 30px;"
             clearable
             @keyup.enter.native="handleListPage"
           ></el-input>
         </el-form-item>
-        <el-form-item label="修改时间" prop="loginTime">
+        <el-form-item label="访问时间" prop="loginTime" style="align-items: center;">
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -39,6 +39,7 @@
             range-separator="至"
             end-placeholder="结束日期"
             :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 1, 1, 23, 59, 59)]"
+            style="height: 30px;"
           />
         </el-form-item>
         <el-form-item>
@@ -65,85 +66,73 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="序号" prop="operId" width="70px" align="center" type="index"></el-table-column>
-        <el-table-column
-          label="产品名称"
-          prop="productName"
-          width="180px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="型号"
-          prop="model"
-          width="120px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="规格"
-          prop="spec"
-          width="120px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="参数"
-          prop="parameters"
-          width="120px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="供应商/制造厂商"
-          prop="supplier"
-          width="200px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="申报价格"
-          prop="bidPrice"
-          width="100px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="项目审核价格"
-          prop="approvedPrice"
-          width="120px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="审定价"
-          prop="approvalStatus"
-          width="100px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="其他参考价"
-          prop="referencePrice"
-          width="120px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          label="时间"
-          prop="time"
-          width="180px"
-          align="center"
-          :show-overflow-tooltip="true"
-        ></el-table-column>
+        <el-table-column label="序号" prop="projectId" width="70px" align="center" type="index"></el-table-column>
         <el-table-column
           label="项目名称"
           prop="projectName"
+          width="180px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column label="状态" prop="status" width="120px" align="center" :show-overflow-tooltip="true"></el-table-column>
+        <el-table-column label="来源" prop="source" width="120px" align="center" :show-overflow-tooltip="true"></el-table-column>
+        <el-table-column
+          label="项目类型"
+          prop="projectType"
+          width="120px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="参研单位"
+          prop="researchUnit"
           width="200px"
           align="center"
           :show-overflow-tooltip="true"
         ></el-table-column>
-        <el-table-column label="操作" align="center" width="70" fixed="right">
+        <el-table-column
+          label="总体单位"
+          prop="overallUnit"
+          width="100px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="项目资料"
+          prop="projectDocuments"
+          width="120px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="经费概要"
+          prop="fundingSummary"
+          width="100px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="项目经理"
+          prop="projectManager"
+          width="120px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="上传系统时间"
+          prop="uploadSystemTime"
+          width="180px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          label="上传数据包"
+          prop="uploadDataPackage"
+          width="200px"
+          align="center"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column label="操作" align="center" width="120" fixed="right">
           <template #default="{ row }">
             <el-tooltip content="删除🌻" placement="top">
               <el-button
@@ -153,6 +142,16 @@
                 plain
                 @click="handleDelete(row)"
                 v-auth="['system:role:delete']"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip content="查看🌻" placement="top">
+              <el-button
+                type="primary"
+                icon="View"
+                circle
+                plain
+                @click="handleView(row)"
+                v-auth="['system:role:list']"
               ></el-button>
             </el-tooltip>
           </template>
@@ -177,7 +176,7 @@
       <KoiDialog ref="koiDialogRef" :title="title" top="6vh" :height="660" :width="800" :footerHidden="true">
         <template #content>
           <!-- 描述列表 -->
-          <el-descriptions direction="vertical" :column="3" border>
+          <el-descriptions direction="vertical" :column="3">
             <el-descriptions-item label="方法名称">{{ form.methodName }}</el-descriptions-item>
             <el-descriptions-item label="消耗时间[毫秒]">{{ form.costTime }}</el-descriptions-item>
             <el-descriptions-item label="操作状态">
@@ -197,7 +196,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="operlogPage">
+<script setup lang="ts" name="projectPage">
 import { ref, onMounted } from "vue";
 // @ts-ignore
 import { koiNoticeSuccess, koiNoticeError, koiMsgWarning, koiMsgBox, koiMsgInfo, koiMsgError } from "@/utils/koi.ts";
@@ -213,175 +212,271 @@ const showSearch = ref<boolean>(true); // 默认显示搜索条件
 // 数据表格数据
 const tableList = ref<any>([
   {
-  productName: "激光测距仪",
-    model: "LX-500",
-    spec: "高精度",
-    parameters: JSON.stringify({
-      "测量量程": "0.15-60m",
-      "激光参数": "635纳米",
-      "激光等级": "2级"
-    }),
-    supplier: "XXX科技有限公司",
-    bidPrice: 320000,
-    approvedPrice: 320000,
-    approvalStatus: "通过",
-    referencePrice: null,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "人工智能研究开发",
+    status: "进行中",
+    source: "政府资助",
+    projectType: "研究",
+    researchUnit: "人工智能研究所",
+    overallUnit: "科技创新有限公司",
+    totalApplicationFundingWan: 500,
+    totalReviewFundingWan: 480,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 4,
+    evaluationReport: "进行中",
+    projectDocuments: "文档链接",
+    fundingSummary: "已批准",
+    projectManager: "张三",
+    uploadSystemTime: "2025-01-01 10:00",
+    uploadDataPackage: "数据包1",
+    action: "提交"
   },
   {
-    productName: "工业无人机",
-    model: "DR-900",
-    spec: "标配",
-    parameters: JSON.stringify({
-      '空载转速（米/分钟）': "0-192",
-      "测量量程": "1-20km",
-      "最大续航时间": "120分钟"
-    }),
-    supplier: "YYY无人机厂商",
-    bidPrice: 400000,
-    approvedPrice: 380000,
-    approvalStatus: "调整",
-    referencePrice: 395000,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "量子计算计划",
+    status: "已完成",
+    source: "大学资助",
+    projectType: "研究",
+    researchUnit: "量子计算实验室",
+    overallUnit: "量子创新公司",
+    totalApplicationFundingWan: 300,
+    totalReviewFundingWan: 280,
+    adjustmentAmountWan: 10,
+    adjustmentRatioPercent: 3.33,
+    evaluationReport: "已完成",
+    projectDocuments: "文档链接",
+    fundingSummary: "已结算",
+    projectManager: "李四",
+    uploadSystemTime: "2024-12-15 15:30",
+    uploadDataPackage: "数据包2",
+    action: "审核"
   },
   {
-    productName: "热成像仪",
-    model: "HT-700",
-    spec: "红外",
-    parameters: JSON.stringify({
-      "分辨率": "640x480",
-      "测温范围": "-20°C 至 600°C",
-      "焦距": "25mm"
-    }),
-    supplier: "ZZZ电子设备厂",
-    bidPrice: 310000,
-    approvedPrice: 310000,
-    approvalStatus: "通过",
-    referencePrice: null,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "智慧城市建设",
+    status: "待审",
+    source: "私人投资",
+    projectType: "建设",
+    researchUnit: "城市规划研究院",
+    overallUnit: "城市发展有限公司",
+    totalApplicationFundingWan: 1000,
+    totalReviewFundingWan: 950,
+    adjustmentAmountWan: 50,
+    adjustmentRatioPercent: 5,
+    evaluationReport: "待审",
+    projectDocuments: "文档链接",
+    fundingSummary: "待审",
+    projectManager: "王五",
+    uploadSystemTime: "2025-01-10 09:45",
+    uploadDataPackage: "数据包3",
+    action: "提交"
   },
   {
-    productName: "零星耗材",
-    model: "ABC",
-    spec: "普通",
-    parameters: JSON.stringify({
-      "材质": "塑料",
-      "包装规格": "100个/批",
-      "颜色": "随机"
-    }),
-    supplier: "供应链A公司",
-    bidPrice: 280000,
-    approvedPrice: 280000,
-    approvalStatus: "通过",
-    referencePrice: 285000,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "医疗机器人研究",
+    status: "进行中",
+    source: "研究基金",
+    projectType: "研究",
+    researchUnit: "机器人技术研究院",
+    overallUnit: "医科技术解决方案",
+    totalApplicationFundingWan: 800,
+    totalReviewFundingWan: 780,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 2.5,
+    evaluationReport: "进行中",
+    projectDocuments: "文档链接",
+    fundingSummary: "已批准",
+    projectManager: "李华",
+    uploadSystemTime: "2025-01-05 14:00",
+    uploadDataPackage: "数据包4",
+    action: "提交"
   },
   {
-    productName: "智能分析系统",
-    model: "AAA-Tech",
-    spec: "旗舰版",
-    parameters: JSON.stringify({
-      "运算能力": "1000TFLOPS",
-      "存储容量": "2PB",
-      "网络接口": "10GbE"
-    }),
-    supplier: "科技研发X企业",
-    bidPrice: 880000,
-    approvedPrice: 800000,
-    approvalStatus: "调整",
-    referencePrice: 850000,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "太空探索计划",
+    status: "已完成",
+    source: "政府资助",
+    projectType: "研究",
+    researchUnit: "太空研究中心",
+    overallUnit: "航空航天技术公司",
+    totalApplicationFundingWan: 1200,
+    totalReviewFundingWan: 1150,
+    adjustmentAmountWan: 30,
+    adjustmentRatioPercent: 2.5,
+    evaluationReport: "已完成",
+    projectDocuments: "文档链接",
+    fundingSummary: "已结算",
+    projectManager: "赵六",
+    uploadSystemTime: "2024-12-20 11:20",
+    uploadDataPackage: "数据包5",
+    action: "审核"
   },
   {
-    productName: "便携式气象站",
-    model: "WX-P800",
-    spec: "高端",
-    parameters: JSON.stringify({
-      "风速测量范围": "0.3-30m/s",
-      "温度测量范围": "-40°C 至 60°C",
-      "湿度测量范围": "0-100%"
-    }),
-    supplier: "气象设备B厂商",
-    bidPrice: 360000,
-    approvedPrice: 360000,
-    approvalStatus: "通过",
-    referencePrice: null,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "清洁能源解决方案",
+    status: "进行中",
+    source: "环保基金",
+    projectType: "研究",
+    researchUnit: "清洁能源实验室",
+    overallUnit: "生态技术公司",
+    totalApplicationFundingWan: 600,
+    totalReviewFundingWan: 590,
+    adjustmentAmountWan: 10,
+    adjustmentRatioPercent: 1.67,
+    evaluationReport: "进行中",
+    projectDocuments: "文档链接",
+    fundingSummary: "已批准",
+    projectManager: "刘杰",
+    uploadSystemTime: "2025-01-02 13:15",
+    uploadDataPackage: "数据包6",
+    action: "提交"
   },
   {
-    productName: "自动化生产设备",
-    model: "XZ-300",
-    spec: "定制",
-    parameters: JSON.stringify({
-      "生产速度": "60件/小时",
-      "电压": "220V",
-      "功率": "15kW"
-    }),
-    supplier: "工业C制造商",
-    bidPrice: 950000,
-    approvedPrice: 940000,
-    approvalStatus: "调整",
-    referencePrice: null,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "区块链安全研究",
+    status: "待审",
+    source: "私人投资",
+    projectType: "技术开发",
+    researchUnit: "区块链实验室",
+    overallUnit: "安全技术创新公司",
+    totalApplicationFundingWan: 500,
+    totalReviewFundingWan: 480,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 4,
+    evaluationReport: "待审",
+    projectDocuments: "文档链接",
+    fundingSummary: "待审",
+    projectManager: "张强",
+    uploadSystemTime: "2025-01-07 16:00",
+    uploadDataPackage: "数据包7",
+    action: "审核"
   },
   {
-    productName: "高精度激光测量仪",
-    model: "LaserX-900",
-    spec: "增强版",
-    parameters: JSON.stringify({
-      "测量量程": "0.05-120m",
-      "精度": "±1mm",
-      "激光等级": "2级"
-    }),
-    supplier: "精密仪器D公司",
-    bidPrice: 480000,
-    approvedPrice: 470000,
-    approvalStatus: "通过",
-    referencePrice: 490000,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "农业创新技术",
+    status: "已完成",
+    source: "政府资助",
+    projectType: "研究",
+    researchUnit: "农业研究所",
+    overallUnit: "农业技术公司",
+    totalApplicationFundingWan: 700,
+    totalReviewFundingWan: 680,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 2.86,
+    evaluationReport: "已完成",
+    projectDocuments: "文档链接",
+    fundingSummary: "已结算",
+    projectManager: "陈娜",
+    uploadSystemTime: "2024-12-25 10:00",
+    uploadDataPackage: "数据包8",
+    action: "审核"
   },
   {
-    productName: "移动式水质监测站",
-    model: "Water-Q300",
-    spec: "标准版",
-    parameters: JSON.stringify({
-      "监测范围": "pH, COD, BOD",
-      "电池续航时间": "8小时",
-      "数据传输方式": "无线"
-    }),
-    supplier: "环保设备E供应商",
-    bidPrice: 720000,
-    approvedPrice: 700000,
-    approvalStatus: "调整",
-    referencePrice: 750000,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
+    projectName: "智能制造系统",
+    status: "进行中",
+    source: "私人投资",
+    projectType: "技术开发",
+    researchUnit: "制造技术实验室",
+    overallUnit: "智能技术产业公司",
+    totalApplicationFundingWan: 900,
+    totalReviewFundingWan: 880,
+    adjustmentAmountWan: 30,
+    adjustmentRatioPercent: 3.33,
+    evaluationReport: "进行中",
+    projectDocuments: "文档链接",
+    fundingSummary: "已批准",
+    projectManager: "孙明",
+    uploadSystemTime: "2025-01-04 17:45",
+    uploadDataPackage: "数据包9",
+    action: "提交"
   },
   {
-    productName: "高速数据处理服务器",
-    model: "DataCore-5000",
-    spec: "旗舰版",
-    parameters: JSON.stringify({
-      "CPU": "128核",
-      "内存": "2TB",
-      "存储容量": "10PB"
-    }),
-    supplier: "服务器制造F企业",
-    bidPrice: 1200000,
-    approvedPrice: 1150000,
-    approvalStatus: "通过",
-    referencePrice: 1250000,
-    time: "2025-01-09 01:31:34",
-    projectName: "1"
-  }
+    projectName: "医疗AI技术研究",
+    status: "待审",
+    source: "研究基金",
+    projectType: "研究",
+    researchUnit: "医疗AI实验室",
+    overallUnit: "医疗科技创新公司",
+    totalApplicationFundingWan: 800,
+    totalReviewFundingWan: 780,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 2.5,
+    evaluationReport: "待审",
+    projectDocuments: "文档链接",
+    fundingSummary: "待审",
+    projectManager: "周强",
+    uploadSystemTime: "2025-01-08 12:30",
+    uploadDataPackage: "数据包10",
+    action: "审核"
+  },
+  {
+    projectName: "区块链安全研究",
+    status: "待审",
+    source: "私人投资",
+    projectType: "技术开发",
+    researchUnit: "区块链实验室",
+    overallUnit: "安全技术创新公司",
+    totalApplicationFundingWan: 500,
+    totalReviewFundingWan: 480,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 4,
+    evaluationReport: "待审",
+    projectDocuments: "文档链接",
+    fundingSummary: "待审",
+    projectManager: "张强",
+    uploadSystemTime: "2025-01-07 16:00",
+    uploadDataPackage: "数据包7",
+    action: "审核"
+  },
+  {
+    projectName: "农业创新技术",
+    status: "已完成",
+    source: "政府资助",
+    projectType: "研究",
+    researchUnit: "农业研究所",
+    overallUnit: "农业技术公司",
+    totalApplicationFundingWan: 700,
+    totalReviewFundingWan: 680,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 2.86,
+    evaluationReport: "已完成",
+    projectDocuments: "文档链接",
+    fundingSummary: "已结算",
+    projectManager: "陈娜",
+    uploadSystemTime: "2024-12-25 10:00",
+    uploadDataPackage: "数据包8",
+    action: "审核"
+  },
+  {
+    projectName: "智能制造系统",
+    status: "进行中",
+    source: "私人投资",
+    projectType: "技术开发",
+    researchUnit: "制造技术实验室",
+    overallUnit: "智能技术产业公司",
+    totalApplicationFundingWan: 900,
+    totalReviewFundingWan: 880,
+    adjustmentAmountWan: 30,
+    adjustmentRatioPercent: 3.33,
+    evaluationReport: "进行中",
+    projectDocuments: "文档链接",
+    fundingSummary: "已批准",
+    projectManager: "孙明",
+    uploadSystemTime: "2025-01-04 17:45",
+    uploadDataPackage: "数据包9",
+    action: "提交"
+  },
+  {
+    projectName: "医疗AI技术研究",
+    status: "待审",
+    source: "研究基金",
+    projectType: "研究",
+    researchUnit: "医疗AI实验室",
+    overallUnit: "医疗科技创新公司",
+    totalApplicationFundingWan: 800,
+    totalReviewFundingWan: 780,
+    adjustmentAmountWan: 20,
+    adjustmentRatioPercent: 2.5,
+    evaluationReport: "待审",
+    projectDocuments: "文档链接",
+    fundingSummary: "待审",
+    projectManager: "周强",
+    uploadSystemTime: "2025-01-08 12:30",
+    uploadDataPackage: "数据包10",
+    action: "审核"
+  },
 ]);
 
 // 查询参数

@@ -1,65 +1,41 @@
 <template>
-  <div class="p-4px">
-    <el-alert
-      title="引导页对于一些第一次进入项目的人很有用，你可以简单介绍下项目的功能。本 Demo 是基于 driver.js, pnpm install driver.js"
-      type="warning"
-      :closable="false"
-    />
-    <div id="one">
-      <el-button type="primary">第一步</el-button>
-    </div>
-    <br />
-    <div id="two">
-      <el-button type="warning">第二步</el-button>
-    </div>
-    <br />
-    <div id="three">
-      <el-button type="danger">第三步</el-button>
-    </div>
-    <br />
-    <div>
-      <el-button type="primary" @click.prevent.stop="driverObj.drive()"> 打开引导页</el-button>
-    </div>
-  </div>
+  <div>
+  <userDataChart></userDataChart>
+  <el-row :gutter="20" class="m-t-5px">
+    <!-- 注意：如果不进行操作数组，使用index当key没有问题，若是数组会用来增删改查则不能使用index当key。 -->
+    <el-col :span="12" :lg="12" :md="12" :sm="24" :xs="24">
+      <el-card class="rounded-md dark:bg-black" shadow="hover">
+        <pieChart></pieChart>
+      </el-card>
+    </el-col>
+    <el-col :span="12" :lg="12" :md="12" :sm="24" :xs="24">
+      <el-card class="rounded-md dark:bg-black" shadow="hover">
+        <radarChart></radarChart>
+      </el-card>
+    </el-col>
+  </el-row>
+  <el-row :gutter="20" class="m-t-5px">
+    <!-- 注意：如果不进行操作数组，使用index当key没有问题，若是数组会用来增删改查则不能使用index当key。 -->
+    <el-col :span="18" :lg="18" :md="18" :sm="24" :xs="24">
+      <el-card class="rounded-md dark:bg-black" shadow="hover">
+        <columnRightChart></columnRightChart>
+      </el-card>
+    </el-col>
+    <el-col :span="6" :lg="6" :md="6" :sm="24" :xs="24">
+      <el-card class="rounded-md dark:bg-black" shadow="hover">
+        <timeLineChart></timeLineChart>
+      </el-card>
+    </el-col>
+  </el-row>
+</div>
 </template>
 
 <script setup lang="ts" name="driverPage">
-import { driver } from "driver.js";
-import "driver.js/dist/driver.css";
-
-// 根据div的ID进行配置
-const driverObj = driver({
-  allowClose: true,
-  doneBtnText: "结束",
-  nextBtnText: "下一步",
-  prevBtnText: "上一步",
-  steps: [
-    {
-      element: "#one",
-      popover: {
-        title: "第一步",
-        description: "第一步引导",
-        side: "right"
-      }
-    },
-    {
-      element: "#two",
-      popover: {
-        title: "第二步",
-        description: "第二步引导",
-        side: "right"
-      }
-    },
-    {
-      element: "#three",
-      popover: {
-        title: "第三步",
-        description: "第三步引导",
-        side: "left"
-      }
-    }
-  ]
-});
+import pieChart from "./components/pieChart.vue";
+import radarChart from "./components/radarChart.vue";
+import userDataChart from "./components/userDataChart.vue";
+import timeLineChart from "./components/timeLineChart.vue";
+import columnRightChart from "./components/columnRightChart.vue";
 </script>
 
 <style scoped lang="scss"></style>

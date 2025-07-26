@@ -1,9 +1,9 @@
 <template>
-  <div style="margin-bottom: 8px; display: flex">
+  <div style="margin-bottom: 1px; display: flex;margin-top: 5px;">
     <el-upload :showfile-list="false" :on-change="uploadFileChange">
       <el-button type="primary" :icon="UploadFilled">上传</el-button>
     </el-upload>
-    <el-button type="primary" plain @click="newProjectDialog = true" style="margin-left: 10px">
+    <el-button type="primary" plain @click="newProjectDialog = true" style="margin-left: 10px;">
       <el-icon><Plus /></el-icon>
       <span>新建项目</span>
     </el-button>
@@ -21,22 +21,21 @@
     </template>
   </el-dialog>
 
-  <div style="margin-bottom: 3px; ">
-    <el-input placeholder="请输入关键字" style="width: 55%; height: 35px" :suffix-icon="Search" />
+  <div style="margin-bottom: 0px; ">
+    <el-input placeholder="请输入关键字" clearable="true" style="width: 100%; height: 3.5vh" :suffix-icon="Search" v-model="searchKeyword" @keyup.enter="KeyWordSearch"/>
 
-    <div style="float: right">
-      <!-- <el-button type="primary" style="height: 35px"><el-icon :size = "18"><Search /></el-icon>&nbsp;&nbsp;搜&nbsp;索&nbsp;</el-button> -->
-      <el-button type="primary" style="height: 35px"
-        ><el-icon :size="13"><CloseBold /></el-icon>清除</el-button
+    <!-- <div style="float: right">
+      <el-button type="primary" style="height: 3.5vh"  @click="clearSearch"
+        >清除</el-button
       >
-    </div>
+    </div> -->
   </div>
 
   <!-- 文件夹路径导航和返回按钮 -->
   <div class="breadcrumb-container">
     <!-- Home 图标 -->
     <div class="breadcrumb">
-      <span class="home-icon" @click="navigateTo(0)">🏠></span>
+      <span class="home-icon" @click="navigateTo(0)">🏠</span>
       <!-- 折叠导航路径 -->
       <span v-if="currentPath.length > 2">
         <span @click="navigateTo(0)">{{ currentPath[0].name }}</span>
@@ -71,21 +70,26 @@
       :class="{ hovered: hoverItem === item.id }"
     >
       <span v-if="item.type === 'folder'">📁{{ item.name }}</span>
-      <div v-else style="display: flex; align-items: center; justify-content: center; height: 55px; width: 100%">
-        <!-- 📄 {{ item.name }} -->
+      <div v-else style="display: flex; align-items: center; justify-content: center; height: 5vh; width: 100%">
         <div>
           <el-image
-            style="width: 55px; height: 55px; margin-top: 5px; margin-left: 5px"
+            style="height: 5vh; margin-top: 2px; margin-left: 5px"
             :src="item.type === 'word' ? url : url2"
           />
         </div>
         <div>
-          <div style="font-size: small; margin-bottom: 12px; margin-left: 10px">{{ item.name }}</div>
-          <div style="font-size: 10px; margin-top: 12px; margin-left: 10px">2024/12/25</div>
+          <div style="font-size: small; margin-bottom: 1vh; margin-left: 10px">{{ item.name }}</div>
+          <div style="font-size: 10px; margin-top: 1vh; margin-left: 10px">2024/12/25</div>
         </div>
-        <div class="action-icon" @click.stop="handleActionClick(item)">
-          <el-icon><Delete /></el-icon>
+        <div style="margin-left: auto; display: flex; align-items: center;">
+          <div class="action-icon-extraction" @click.stop="clickToextraction(item)">
+            <el-button type="primary" plain size="small">抽取</el-button>
+          </div>       
+          <div class="action-icon" @click.stop="handleActionClick(item)">
+            <el-button type="info" plain >&nbsp;<el-icon><Delete /></el-icon>&nbsp;</el-button>
+          </div>
         </div>
+        
       </div>
       <span class="action-icon" @click.stop="handleActionClick(item)" title="操作" v-if="item.type === 'folder'">
         <el-icon><Tools /></el-icon>
@@ -105,7 +109,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 const folders = reactive([
   {
     id: 1,
-    name: "主文件夹",
+    name: "",
     children: [
       {
         id: 2,
@@ -134,11 +138,13 @@ const folders = reactive([
     ]
   }
 ]);
-const url1 = "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg";
-const url = "https://www.bing.com/th?id=OIP.2Ece0gBRJjRX1S0cMYhxbAHaHa&w=174&h=185&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2";
-const url2 = "https://tse2-mm.cn.bing.net/th/id/OIP-C.HyhxFGJAcMQyKQmT5CG0OQHaHa?w=158&h=180&c=7&r=0&o=5&dpr=1.5&pid=1.7";
+const url1 = ref("");
+const url = ref("");
+const url2 = ref("");
 // 新建项目dialog指示
 const newProjectDialog = ref(false);
+// 关键词搜索
+const searchKeyword = ref("");
 
 // 当前路径，用于记录导航的文件夹层级
 const currentPath = reactive([folders[0]]); // 初始化为根目录
@@ -213,6 +219,10 @@ function handleActionClick(item) {
     });
 }
 
+function clickToextraction(item) {
+  ElMessage.error("点击进行信息抽取")
+}
+
 // 递归删除文件夹
 function deleteFolder(folder, children) {
   if (!Array.isArray(children)) {
@@ -272,6 +282,18 @@ async function uploadFileChange(file) {
   } catch (error) {
     console.error("上传出错:", error);
   }
+}
+
+//处理keyword的搜索
+async function KeyWordSearch() {
+  if (searchKeyword.value === "") {
+    searchKeyword.value = null;
+  }
+  ElMessage.success("点击进搜索")
+}
+
+async function inputChange() {
+  ElMessage.success(`点击进搜索${searchKeyword.value}`)
 }
 </script>
 
@@ -335,6 +357,14 @@ li.hovered {
   color: #606266;
   font-size: 16px;
 }
+
+.action-icon-extraction {
+  cursor: pointer;
+  margin-right: 7px;
+  color: #606266;
+  font-size: 16px;
+}
+
 .empty-folder {
   color: gray;
   font-style: italic;
